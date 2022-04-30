@@ -1,5 +1,4 @@
 import { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
@@ -8,33 +7,27 @@ class App extends Component {
     super();//calls underlying constructor method of any other classes you're extending from
 
     this.state = {
-      name: {firstName: 'Phillip', lastName: 'Ndlovu'},
-      company: 'N-ivory'
+      monstors: [],
     }
   }
 
+  componentDidMount() {//only happens once in components life.
+    fetch('https://jsonplaceholder.typicode.com/users')
+    .then(response => response.json())//converting to json. whatever is returned from response.json() will be in users
+    .then( (users) => this.setState(()=> {
+      return {monstors: users}
+    }),
+    () => {
+      console.log(this.state);
+    }) 
+  }
 
   render(){
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Hello {this.state.name.firstName} {this.state.name.lastName}. I work at {this.state.company}
-          </p>
-          <button onClick={()=> { 
-            this.setState(
-              (state, props) => {
-                return {
-                  name: {firstName: 'Zuzimpilo', lastName: 'Ndlovu ZZ'}
-                }
-              },
-              () => {
-                console.log(this.state);
-              }
-            );
-          }}>Change Name</button>
-        </header>
+        {
+          this.state.monstors.map(monstor => {return <div key={monstor.name}><h1>{monstor.name}</h1></div>})
+        }
       </div>
     );
   }
