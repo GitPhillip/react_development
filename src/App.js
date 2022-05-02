@@ -1,58 +1,46 @@
-import { Component } from 'react';
-
+import { useEffect, useState } from 'react';
 
 import CardList from './components/card-list/card-list.component';
 import SearchBox from './components/search-box/search-box.component';
+
 import './App.css';
 
-class App extends Component {
+const App = () => {
 
-  constructor(){
-    super();//calls underlying constructor method of any other classes you're extending from
+  //---------------Local State------------------------
+  const [searchField, setSearchField] = useState('');
+  const [monstors, setMonstors] = useState([]);
+  const [filteredMonstors, setFilteredMonstors] = useState(monstors);
+  //---------------Local State------------------------
 
-    this.state = {//initialize the state of the class
-      monstors: [],
-      searchField: ''
-    }
-  }
 
-  componentDidMount() {//only happens once in components life.
+  //---------------On mount---------------------------
+  //Only used to fetch the monstors
+  useEffect(()=>{
     fetch('https://jsonplaceholder.typicode.com/users')
-    .then(response => response.json())//converting to json. whatever is returned from response.json() will be in users
-    .then( (users) => 
-      this.setState(
-        ()=> {
-        return {monstors: users}
-        }),
-        () => {
-          console.log(this.state);
-        }
-      )
-  }
+      .then(response => response.json())
+      .then( users => {setMonstors(users); setFilteredMonstors(users)});
+  }, []);
 
-  onSearchChange = (e) => {
-    console.log(e)
-    const searchField = e.target.value.toLocaleLowerCase();
-    this.setState(
-      ()=> {
-        return {
-          searchField
-        }
-      },
-      () => {}
-    );
-  }
-
-  render(){
-
-    const {monstors, searchField} = this.state;
-    const {onSearchChange} = this;
-    const filteredMonstors = monstors.filter(monstor => {
+  //Only used to update the filtered monstors once the search field changes
+  useEffect(()=>{
+    const newFilteredMonstors = monstors.filter(monstor =>{
       return monstor.name.toLocaleLowerCase().includes(searchField);
     });
+    setFilteredMonstors(newFilteredMonstors);
+  },[monstors, searchField]);
+  //---------------Local State------------------------
 
-    return (
-      <div className="App">
+
+  //---------------Onchange Handlers-------------------
+  const onSearchChange = (e) => {
+    const searchFieldString = e.target.value.toLocaleLowerCase();
+    setSearchField(searchFieldString);
+  }
+  //---------------Onchange Handlers-------------------
+
+  return (
+    <div className="App">
         <h1 className='app-title'>Rolodex Monstors</h1>
         <SearchBox 
           onChangeHandler={onSearchChange} 
@@ -60,10 +48,8 @@ class App extends Component {
           className={'monstors-search-box'}
         />
         <CardList monstors={filteredMonstors}/>
-      </div>
-    );
-  }
-  
+    </div>
+  );
 }
 
 export default App;
